@@ -14,12 +14,6 @@ type BinarryTree struct {
 	root *Tree
 }
 
-func Hello() {
-	fmt.Println("hello world!")
-	v := new(Tree)
-	fmt.Println(v.Val)
-}
-
 func GetBinarryTree(v int) *BinarryTree {
 	t := Tree{Val: v}
 	tree := BinarryTree{&t}
