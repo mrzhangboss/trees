@@ -54,7 +54,6 @@ func (t *AVLTree) Add(v int) {
 		node := fathers[i]
 		l, r, m, d := node.LRMD()
 		if d > 1 {
-			fmt.Printf("node %d -%d - %d", node.Val, v, i)
 			r := balance(node, l, r)
 			if i == 0 {
 				t.root = r
@@ -76,7 +75,6 @@ func (t *AVLTree) Add(v int) {
 }
 
 func (node *ATree) LRMD() (l, r, m, d int) {
-	// var l, r, m, d int
 	if node.Left != nil {
 		l = node.Left.Height
 	} else {
@@ -183,5 +181,128 @@ func (b *AVLTree) Find(v int) bool {
 			return false
 		}
 	}
+
+}
+
+func (b *AVLTree) Delete(v int) {
+	root := b.root
+	fathers := []*ATree{}
+	lefts := []bool{}
+	for {
+		if root != nil {
+			if root.Val == v {
+				break
+			} else {
+				if root.Val > v {
+					if root.Left == nil {
+						return
+					} else {
+						fathers = append(fathers, root)
+						lefts = append(lefts, true)
+						root = root.Left
+					}
+				} else {
+					if root.Right == nil {
+						return
+					} else {
+						fathers = append(fathers, root)
+						lefts = append(lefts, false)
+						root = root.Right
+					}
+				}
+			}
+		} else {
+			fmt.Println("Tree is nil")
+			return
+		}
+	}
+
+	if len(fathers) == 0 {
+		node := delete(root)
+		node.Update()
+		l, r, _, d := node.LRMD()
+		if d > 1 {
+			node = balance(node, l, r)
+			node.Update()
+		}
+		b.root = node
+	} else {
+		updateFather(fathers[len(fathers)-1], delete(root), lefts[len(lefts)-1])
+
+		for i := len(fathers) - 1; i >= 0; i-- {
+			node := fathers[i]
+			l, r, _, d := node.LRMD()
+			if d > 1 {
+				r := balance(node, l, r)
+				if i == 0 {
+					b.root = r
+				} else {
+					isLeft := lefts[i-1]
+					updateFather(fathers[i-1], r, isLeft)
+				}
+				node = r
+			}
+			node.Update()
+		}
+	}
+
+}
+
+func updateFather(father, son *ATree, left bool) {
+	if left {
+		father.Left = son
+	} else {
+		father.Right = son
+	}
+}
+
+func sonBalance(son, father *ATree, isLeft bool) {
+	son.Update()
+	l, r, _, d := son.LRMD()
+	if d > 1 {
+		node := balance(son, l, r)
+		updateFather(father, node, isLeft)
+	}
+	father.Update()
+
+}
+
+func delete(root *ATree) *ATree {
+
+	if root.Left == nil && root.Right == nil {
+		root = nil
+		return root
+	}
+	if root.Left == nil && root.Right != nil {
+		return root.Right
+	}
+	if root.Left != nil && root.Right == nil {
+		return root.Left
+	}
+	if root.Left.Right == nil {
+		root.Left.Right = root.Right
+		return root.Left
+	}
+	father := root.Left
+	node := root.Left.Right
+	fathers := []*ATree{root, father}
+	lefts := []bool{true}
+	for {
+		if node.Right == nil {
+			break
+		} else {
+			father = node
+			fathers = append(fathers, father)
+			lefts = append(lefts, false)
+			node = node.Right
+		}
+	}
+	node.Right = root.Right
+	father.Right = node.Left
+	node.Left = root.Left
+	for i := len(fathers) - 1; i > 0; i-- {
+		sonBalance(fathers[i], fathers[i-1], lefts[i-1])
+	}
+	return node
 
 }
