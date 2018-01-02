@@ -1,42 +1,34 @@
 package trees
 
 import (
-	"fmt"
+	_ "fmt"
 	"testing"
 )
-
-func tesForPointer(l *[]int) {
-	n := append(*l, 10)
-	n = make([]int, 0, 100)
-	for i := 1; i < 100; i = i + 1 {
-		n = append(n, 10)
-		fmt.Println(i, len(n), cap(n), &n)
-	}
-
-	fmt.Println(n[2])
-	s := (*l)[1:2]
-	s = append(s, 5)
-	fmt.Println(s[1])
-	fmt.Println(n[2])
-	fmt.Println(n[len(n)-1], len(n), cap(n))
-	fmt.Println((*l)[len(*l)-1], len(*l), cap(*l))
-
-}
-
-func testListPointer(t *testing.T) {
-	l := make([]int, 3, 10)
-	tesForPointer(&l)
-	if len(l) != 4 {
-		t.Error(l)
-	}
-}
 
 func TestAVLAdd(t *testing.T) {
 	var tests = []struct {
 		values []int
 		result string
 	}{
-		{[]int{6, 3, 7, 1, 4, 2}, "3,1,2,6,4,7"},
+		//LL
+		{[]int{4, 3, 2}, "3-2,2-1,4-1"},
+		{[]int{6, 3, 7, 1, 4, 2}, "3-3,1-2,2-1,6-2,4-1,7-1"},
+		{[]int{10, 5, 15, 4, 3}, "10-3,4-2,3-1,5-1,15-1"},
+
+		//LR
+		{[]int{4, 2, 3}, "3-2,2-1,4-1"},
+		{[]int{6, 2, 7, 1, 4, 5}, "4-3,2-2,1-1,6-2,5-1,7-1"},
+		{[]int{6, 2, 7, 1, 4, 3}, "4-3,2-2,1-1,3-1,6-2,7-1"},
+
+		// RL
+		{[]int{1, 3, 2}, "2-2,1-1,3-1"},
+		{[]int{2, 1, 6, 4, 8, 3}, "4-3,2-2,1-1,3-1,6-2,8-1"},
+		{[]int{2, 1, 6, 4, 8, 5}, "4-3,2-2,1-1,6-2,5-1,8-1"},
+
+		//RR
+		{[]int{1, 2, 3}, "2-2,1-1,3-1"},
+		{[]int{2, 1, 6, 4, 8, 10}, "6-3,2-2,1-1,4-1,8-2,10-1"},
+		{[]int{2, 1, 6, 4, 8, 7}, "6-3,2-2,1-1,4-1,8-2,7-1"},
 	}
 	for _, test := range tests {
 		tree := GetAVLTree(test.values[0])

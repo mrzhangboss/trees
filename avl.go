@@ -66,6 +66,7 @@ func (t *AVLTree) Add(v int) {
 					fathers[i-1].Right = r
 				}
 			}
+			node = r
 		}
 		l, r, m, d = node.LRMD()
 		node.Height = m + 1
@@ -96,21 +97,47 @@ func (node *ATree) LRMD() (l, r, m, d int) {
 	return
 }
 
+func (node *ATree) Update() {
+	_, _, m, _ := node.LRMD()
+	node.Height = m + 1
+}
+
 func leftBalance(father *ATree) *ATree {
 	l, r, _, _ := father.Left.LRMD()
 	root := father
 	if l > r {
 		left := root.Left
 		root.Left, root.Left.Right = root.Left.Right, root
+		root.Update()
 		return left
 	} else {
-		return nil
+		right := father.Left.Right
+		root.Left.Right, right.Left = right.Left, father.Left
+		root.Left, right.Right = right.Right, father
+		right.Left.Update()
+		root.Update()
+		return right
+
 	}
 
 }
 
 func rightBalance(father *ATree) *ATree {
-	return nil
+	l, r, _, _ := father.Right.LRMD()
+	root := father
+	if l > r {
+		right := father.Right.Left
+		root.Right.Left, right.Right = right.Right, father.Right
+		root.Right, right.Left = right.Left, father
+		right.Right.Update()
+		root.Update()
+		return right
+	} else {
+		left := root.Right
+		root.Right, root.Right.Left = root.Right.Left, root
+		root.Update()
+		return left
+	}
 }
 
 func balance(father *ATree, left, right int) *ATree {
@@ -133,7 +160,7 @@ func FrontIndexTree(tree *ATree, list *[]string) {
 	if tree == nil {
 		return
 	}
-	v := fmt.Sprintf("%d", tree.Val)
+	v := fmt.Sprintf("%d-%d", tree.Val, tree.Height)
 	*list = append(*list, v)
 	FrontIndexTree(tree.Left, list)
 	FrontIndexTree(tree.Right, list)
