@@ -166,3 +166,22 @@ func FrontIndexTree(tree *ATree, list *[]string) {
 	FrontIndexTree(tree.Right, list)
 
 }
+
+func (b *AVLTree) Find(v int) bool {
+	root := b.root
+	for {
+		if root != nil {
+			if root.Val == v {
+				return true
+			} else if root.Val > v {
+				root = root.Left
+			} else {
+				root = root.Right
+			}
+
+		} else {
+			return false
+		}
+	}
+
+}
