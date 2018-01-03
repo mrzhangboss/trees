@@ -10,6 +10,7 @@ func TestAVLAdd(t *testing.T) {
 		values []int
 		result string
 	}{
+		{[]int{4, 3}, "4-2,3-1"},
 		//LL
 		{[]int{4, 3, 2}, "3-2,2-1,4-1"},
 		{[]int{6, 3, 7, 1, 4, 2}, "3-3,1-2,2-1,6-2,4-1,7-1"},

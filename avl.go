@@ -29,19 +29,20 @@ func (t *AVLTree) Add(v int) {
 				break
 			} else {
 				if root.Val > v {
+					fathers = append(fathers, root)
+					lefts = append(lefts, true)
 					if root.Left == nil {
 						root.Left = &ATree{Val: v, Height: 1}
 					} else {
-						fathers = append(fathers, root)
-						lefts = append(lefts, true)
 						root = root.Left
 					}
 				} else {
+					fathers = append(fathers, root)
+					lefts = append(lefts, false)
 					if root.Right == nil {
 						root.Right = &ATree{Val: v, Height: 1}
 					} else {
-						fathers = append(fathers, root)
-						lefts = append(lefts, false)
+
 						root = root.Right
 					}
 				}
@@ -218,7 +219,7 @@ func (b *AVLTree) Delete(v int) {
 	}
 
 	if len(fathers) == 0 {
-		node := delete(root)
+		node := deleteAVL(root)
 		node.Update()
 		l, r, _, d := node.LRMD()
 		if d > 1 {
@@ -227,7 +228,7 @@ func (b *AVLTree) Delete(v int) {
 		}
 		b.root = node
 	} else {
-		updateFather(fathers[len(fathers)-1], delete(root), lefts[len(lefts)-1])
+		updateFather(fathers[len(fathers)-1], deleteAVL(root), lefts[len(lefts)-1])
 
 		for i := len(fathers) - 1; i >= 0; i-- {
 			node := fathers[i]
@@ -267,7 +268,7 @@ func sonBalance(son, father *ATree, isLeft bool) {
 
 }
 
-func delete(root *ATree) *ATree {
+func deleteAVL(root *ATree) *ATree {
 
 	if root.Left == nil && root.Right == nil {
 		root = nil
