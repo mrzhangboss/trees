@@ -103,18 +103,17 @@ func (node *ATree) Update() {
 
 func leftBalance(father *ATree) *ATree {
 	l, r, _, _ := father.Left.LRMD()
-	root := father
 	if l > r {
-		left := root.Left
-		root.Left, root.Left.Right = root.Left.Right, root
-		root.Update()
+		left := father.Left
+		father.Left, father.Left.Right = father.Left.Right, father
+		father.Update()
 		return left
 	} else {
 		right := father.Left.Right
-		root.Left.Right, right.Left = right.Left, father.Left
-		root.Left, right.Right = right.Right, father
+		father.Left.Right, right.Left = right.Left, father.Left
+		father.Left, right.Right = right.Right, father
 		right.Left.Update()
-		root.Update()
+		father.Update()
 		return right
 
 	}
@@ -123,18 +122,17 @@ func leftBalance(father *ATree) *ATree {
 
 func rightBalance(father *ATree) *ATree {
 	l, r, _, _ := father.Right.LRMD()
-	root := father
 	if l > r {
 		right := father.Right.Left
-		root.Right.Left, right.Right = right.Right, father.Right
-		root.Right, right.Left = right.Left, father
+		father.Right.Left, right.Right = right.Right, father.Right
+		father.Right, right.Left = right.Left, father
 		right.Right.Update()
-		root.Update()
+		father.Update()
 		return right
 	} else {
-		left := root.Right
-		root.Right, root.Right.Left = root.Right.Left, root
-		root.Update()
+		left := father.Right
+		father.Right, father.Right.Left = father.Right.Left, father
+		father.Update()
 		return left
 	}
 }
