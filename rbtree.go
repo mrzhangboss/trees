@@ -5,6 +5,9 @@ import (
 	"strings"
 )
 
+const RED = true
+const BLACK = false
+
 type RBTree struct {
 	Color       bool // Red true Black false
 	Val         int
@@ -14,6 +17,8 @@ type RBTree struct {
 type RBT struct {
 	root *RBTree
 }
+
+var TNil = &RBTree{Color: BLACK}
 
 func GetRBTree(v int) *RBT {
 	return &RBT{&RBTree{Color: false, Val: v}}
@@ -134,7 +139,7 @@ func fixFatherBalance(node *RBTree, fathers []*RBTree, lefts []bool) *RBTree {
 		return nil
 	} else if fathers[len(fathers)-1].Color == false {
 		return nil
-	} else if len(fathers) >= 2 && uncle(fathers, lefts) != nil && uncle(fathers, lefts).Color == true {
+	} else if len(fathers) >= 2 && uncle(fathers, lefts) != nil && uncle(fathers, lefts).Color == RED {
 		fathers[len(fathers)-1].Color = false
 		uncle(fathers, lefts).Color = false
 		fathers[len(fathers)-2].Color = true
@@ -165,5 +170,218 @@ func RBFrontIndexTree(tree *RBTree, list *[]string) {
 	*list = append(*list, v)
 	RBFrontIndexTree(tree.Left, list)
 	RBFrontIndexTree(tree.Right, list)
+
+}
+
+func (r *RBT) Delete(v int) {
+	root := r.root
+	fathers := []*RBTree{}
+	lefts := []bool{}
+	for {
+		if root != nil {
+			if root.Val == v {
+				break
+			} else {
+				if root.Val > v {
+					if root.Left == nil {
+						return
+					} else {
+						fathers = append(fathers, root)
+						lefts = append(lefts, true)
+						root = root.Left
+					}
+				} else {
+					if root.Right == nil {
+						return
+					} else {
+						fathers = append(fathers, root)
+						lefts = append(lefts, false)
+						root = root.Right
+					}
+				}
+			}
+		} else {
+			fmt.Println("Tree is nil")
+			return
+		}
+	}
+
+	root, ok := updateRoot(root, fathers, lefts)
+	if ok {
+		r.root = root
+	}
+
+}
+
+func updateRoot(root *RBTree, fathers []*RBTree, lefts []bool) (*RBTree, bool) {
+	var color bool
+	if root.Left == nil && root.Right == nil {
+		n := len(fathers)
+		if n > 0 {
+			if lefts[n-1] {
+				fathers[n-1].Left = nil
+			} else {
+				fathers[n-1].Right = nil
+			}
+			return fixBalance(root.Color, TNil, fathers, lefts)
+
+		} else {
+			return nil, true
+		}
+	} else if root.Left == nil && root.Right != nil {
+		color = root.Color
+		root.Left, root.Right, root.Color, root.Val = root.Right.Left, root.Right.Right, root.Right.Color, root.Right.Val
+		return fixBalance(color, root, fathers, lefts)
+	} else if root.Left != nil && root.Right == nil {
+		color = root.Color
+		root.Left, root.Right, root.Color, root.Val = root.Left.Left, root.Left.Right, root.Left.Color, root.Left.Val
+		return fixBalance(color, root, fathers, lefts)
+	} else if root.Left.Right == nil {
+		color = root.Left.Color
+		root.Val = root.Left.Val
+		root.Left = root.Left.Left
+		fathers = append(fathers, root)
+		lefts = append(lefts, true)
+		if root.Left == nil {
+			return fixBalance(color, TNil, fathers, lefts)
+		}
+		return fixBalance(color, root.Left, fathers, lefts)
+	} else {
+		father := root.Left
+		node := root.Left.Right
+		fathers = append(fathers, root)
+		lefts = append(lefts, true)
+		fathers = append(fathers, father)
+		lefts = append(lefts, false)
+		for {
+			if node.Right == nil {
+				break
+			} else {
+				father = node
+				fathers = append(fathers, father)
+				lefts = append(lefts, false)
+				node = node.Right
+			}
+		}
+		root.Val, father.Right = node.Val, node.Left
+		color = node.Color
+		if father.Right == nil {
+			return fixBalance(color, TNil, fathers, lefts)
+		}
+		return fixBalance(color, father.Right, fathers, lefts)
+	}
+
+}
+
+func fixBalance(color bool, child *RBTree, fathers []*RBTree, lefts []bool) (*RBTree, bool) {
+	if color == BLACK {
+		if child.Color == RED {
+			child.Color = BLACK
+		} else {
+			return fixChildBalance(color, child, fathers, lefts)
+		}
+	}
+	return nil, false
+}
+
+func sibling(fathers []*RBTree, lefts []bool) *RBTree {
+	n := len(fathers)
+	if lefts[n-1] {
+		return fathers[n-1].Right
+	} else {
+		return fathers[n-1].Left
+	}
+}
+
+func setSon(n int, son *RBTree, fathers []*RBTree, lefts []bool) {
+	if lefts[n] {
+		fathers[n].Left = son
+	} else {
+		fathers[n].Right = son
+	}
+}
+
+func Color(r *RBTree) bool {
+	if r == nil {
+		return BLACK
+	} else {
+		return r.Color
+	}
+}
+
+func fixChildBalance(color bool, child *RBTree, fathers []*RBTree, lefts []bool) (*RBTree, bool) {
+	var s, father *RBTree
+	var n int
+	if len(fathers) != 0 {
+		s = sibling(fathers, lefts)
+		n = len(fathers)
+		if s.Color == RED {
+			fathers[n-1].Color = RED
+			s.Color = BLACK
+			father = fathers[n-1]
+			if lefts[n-1] {
+				father.Right, s.Left = s.Left, father
+			} else {
+				father.Left, s.Right = s.Right, father
+			}
+			fathers = append(fathers[:n-1], append([]*RBTree{s}, fathers[n-1:]...)...)
+			lefts = append(lefts[:n-1], append([]bool{lefts[n-1]}, lefts[n-1:]...)...)
+		}
+
+		s = sibling(fathers, lefts)
+		n = len(fathers)
+		father = fathers[n-1]
+		if father.Color == BLACK && s.Color == BLACK && Color(s.Left) == BLACK && Color(s.Right) == BLACK {
+			s.Color = RED
+			return fixChildBalance(BLACK, father, fathers[:n-1], lefts[:n-1])
+		} else if father.Color == RED && s.Color == BLACK && Color(s.Left) == BLACK && Color(s.Right) == BLACK {
+			s.Color = RED
+			father.Color = BLACK
+			return fathers[0], true
+		} else {
+			if s.Color == BLACK {
+
+				if Color(s.Right) == BLACK && Color(s.Left) == RED && lefts[n-1] {
+					s.Color = RED
+
+					left := s.Left
+
+					s.Left.Color = BLACK
+					s.Left.Right, s.Left = s, s.Left.Right
+
+					father.Right = left
+
+					s = left
+				} else if Color(s.Left) == BLACK && Color(s.Right) == RED && lefts[n-1] == false {
+					s.Color = RED
+					s.Right.Color = BLACK
+					right := s.Right
+					s.Right.Left, s.Right = s, s.Right.Left
+
+					father.Left = right
+
+					s = right
+				}
+
+			}
+			s.Color = father.Color
+			father.Color = BLACK
+			if lefts[n-1] {
+				s.Right.Color = BLACK
+				father.Right, s.Left = s.Left, father
+			} else {
+				s.Left.Color = BLACK
+				father.Left, s.Right = s.Right, father
+
+			}
+			fathers = append(fathers[:n-1], append([]*RBTree{s}, fathers[n-1:]...)...)
+			lefts = append(lefts[:n-1], append([]bool{lefts[n-1]}, lefts[n-1:]...)...)
+			return fathers[0], true
+
+		}
+
+	} else {
+		return nil, false
+	}
 
 }

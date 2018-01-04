@@ -27,3 +27,28 @@ func TestRBTAdd(t *testing.T) {
 		}
 	}
 }
+
+func TestRBTDelete(t *testing.T) {
+	var tests = []struct {
+		values []int
+		d      int
+		result string
+	}{
+		{[]int{10, 5}, 10, "5-0"},
+		{[]int{10, 15}, 10, "15-0"},
+		{[]int{10, 5, 15}, 10, "5-0,15-1"},
+		{[]int{10, 5, 15, 8}, 10, "8-0,5-0,15-0"},
+		{[]int{10, 5, 15, 1}, 10, "5-0,1-0,15-0"},
+	}
+	for _, test := range tests {
+		tree := GetRBTree(test.values[0])
+		for _, v := range test.values[1:] {
+			tree.Add(v)
+		}
+		tree.Delete(test.d)
+		if tree.Value() != test.result {
+			t.Errorf("tree %s != %s error", test.result, tree.Value())
+			continue
+		}
+	}
+}
