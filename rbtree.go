@@ -134,10 +134,11 @@ func rbBalance(node *RBTree, fathers []*RBTree, lefts []bool) *RBTree {
 }
 
 func fixFatherBalance(node *RBTree, fathers []*RBTree, lefts []bool) *RBTree {
-	if len(fathers) == 0 {
-		node.Color = false
+	n := len(fathers)
+	if n == 0 {
+		node.Color = BLACK
 		return nil
-	} else if fathers[len(fathers)-1].Color == false {
+	} else if fathers[n-1].Color == BLACK {
 		return nil
 	} else if len(fathers) >= 2 && uncle(fathers, lefts) != nil && uncle(fathers, lefts).Color == RED {
 		fathers[len(fathers)-1].Color = false
