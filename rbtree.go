@@ -38,7 +38,7 @@ func (r *RBT) Add(v int) {
 					fathers = append(fathers, root)
 					lefts = append(lefts, true)
 					if root.Left == nil {
-						node = &RBTree{Val: v, Color: true}
+						node = &RBTree{Val: v, Color: RED}
 						root.Left = node
 						break
 					} else {
@@ -49,7 +49,7 @@ func (r *RBT) Add(v int) {
 					fathers = append(fathers, root)
 					lefts = append(lefts, false)
 					if root.Right == nil {
-						node = &RBTree{Val: v, Color: true}
+						node = &RBTree{Val: v, Color: RED}
 						root.Right = node
 						break
 					} else {
@@ -140,11 +140,11 @@ func fixFatherBalance(node *RBTree, fathers []*RBTree, lefts []bool) *RBTree {
 		return nil
 	} else if fathers[n-1].Color == BLACK {
 		return nil
-	} else if len(fathers) >= 2 && uncle(fathers, lefts) != nil && uncle(fathers, lefts).Color == RED {
-		fathers[len(fathers)-1].Color = false
-		uncle(fathers, lefts).Color = false
-		fathers[len(fathers)-2].Color = true
-		return fixFatherBalance(fathers[len(fathers)-2], fathers[:len(fathers)-2], lefts[:len(lefts)-2])
+	} else if n >= 2 && uncle(fathers, lefts) != nil && uncle(fathers, lefts).Color == RED {
+		fathers[n-1].Color = BLACK
+		uncle(fathers, lefts).Color = BLACK
+		fathers[n-2].Color = RED
+		return fixFatherBalance(fathers[n-2], fathers[:n-2], lefts[:n-2])
 	} else {
 		return rbBalance(node, fathers, lefts)
 	}
