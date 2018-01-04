@@ -385,3 +385,22 @@ func fixChildBalance(color bool, child *RBTree, fathers []*RBTree, lefts []bool)
 	}
 
 }
+
+func (r *RBT) Find(v int) bool {
+	root := r.root
+	for {
+		if root != nil {
+			if root.Val == v {
+				return true
+			} else if root.Val > v {
+				root = root.Left
+			} else {
+				root = root.Right
+			}
+
+		} else {
+			return false
+		}
+	}
+
+}

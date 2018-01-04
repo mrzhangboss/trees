@@ -52,3 +52,25 @@ func TestRBTDelete(t *testing.T) {
 		}
 	}
 }
+
+func TestRBTFind(t *testing.T) {
+	var tests = []struct {
+		values []int
+		find   int
+		r      bool
+	}{
+		{[]int{1}, 1, true},
+		{[]int{1}, 2, false},
+		{[]int{1, 2, 5, 9}, 1, true},
+		{[]int{1, 2, 5, 9}, 5, true},
+	}
+	for _, test := range tests {
+		tree := GetRBTree(test.values[0])
+		for _, v := range test.values[1:] {
+			tree.Add(v)
+		}
+		if tree.Find(test.find) != test.r {
+			t.Errorf("find error %s : %d", tree.Value(), test.find)
+		}
+	}
+}
